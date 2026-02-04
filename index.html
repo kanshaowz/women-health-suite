@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Women's Health Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffeef8 0%, #ffe5f5 25%, #f3e7ff 50%, #e8dcff 75%, #ffeef8 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(251, 207, 232, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px 0 rgba(251, 207, 232, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .calendar-day {
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: absolute;
+            left: -8px;
+            background: #ff6b9d;
+            border: 3px solid white;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(300deg);
+        }
+
+        .fertile-day {
+            background: linear-gradient(135deg, #ffd6e8 0%, #ffb3d9 100%);
+        }
+
+        .ovulation-day {
+            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            color: white;
+        }
+
+        .period-day {
+            background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- Header -->
+    <div class="max-w-6xl mx-auto mb-8">
+        <div class="glass-card rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent" id="app-title">
+                    Women's Health Suite
+                </h1>
+                <p class="text-gray-600 mt-1" id="app-subtitle">Your personal health companion</p>
+            </div>
+
+            <!-- Language Switcher -->
+            <div class="flex gap-2">
+                <button onclick="changeLanguage('en')" class="px-4 py-2 rounded-xl glass-card hover:bg-pink-100 transition-all text-sm font-medium" id="lang-en">🇬🇧 EN</button>
+                <button onclick="changeLanguage('zh')" class="px-4 py-2 rounded-xl glass-card hover:bg-pink-100 transition-all text-sm font-medium" id="lang-zh">🇨🇳 中文</button>
+                <button onclick="changeLanguage('ja')" class="px-4 py-2 rounded-xl glass-card hover:bg-pink-100 transition-all text-sm font-medium" id="lang-ja">🇯🇵 日本語</button>
+                <button onclick="changeLanguage('ko')" class="px-4 py-2 rounded-xl glass-card hover:bg-pink-100 transition-all text-sm font-medium" id="lang-ko">🇰🇷 한국어</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+
+        <!-- Ovulation Calculator -->
+        <div class="glass-card rounded-3xl p-8 fade-in">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-2xl">
+                    🌸
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800" id="ovulation-title">Ovulation Calculator</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" id="last-period-label">Last Period Date</label>
+                    <input type="date" id="lastPeriodDate" class="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" id="cycle-length-label">Cycle Length (days)</label>
+                    <input type="number" id="cycleLength" value="28" min="21" max="35" class="w-full px-4 py-3 rounded-xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none transition-all">
+                </div>
+
+                <button onclick="calculateOvulation()" class="w-full btn-primary text-white font-semibold py-4 rounded-xl" id="calc-ovulation-btn">
+                    Calculate
+                </button>
+            </div>
+
+            <!-- Ovulation Results -->
+            <div id="ovulationResults" class="mt-6 hidden">
+                <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600" id="ovulation-day-label">Ovulation Day</span>
+                        <span class="text-lg font-bold text-pink-600" id="ovulationDay"></span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600" id="fertile-window-label">Fertile Window</span>
+                        <span class="text-sm font-semibold text-purple-600" id="fertileWindow"></span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600" id="next-period-label">Next Period</span>
+                        <span class="text-sm font-semibold text-gray-700" id="nextPeriod"></span>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="mt-6">
+                    <h3 class="font-semibold text-gray-700 mb-3" id="calendar-title">Calendar View</h3>
+                    <div class="grid grid-cols-7 gap-1" id="calendarGrid"></div>
+                    <div class="mt-4 flex flex-wrap gap-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded period-day"></div>
+                            <span id="legend-period">Period</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded fertile-day"></div>
+                            <span id="legend-fertile">Fertile</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded ovulation-day"></div>
+                            <span id="legend-ovulation">Ovulation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pregnancy Calculator -->
+        <div class="glass-card rounded-3xl p-8 fade-in">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl">
+                    👶
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800" id="pregnancy-title">Pregnancy Calculator</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" id="calculation-method-label">Calculation Method</label>
+                    <select id="pregnancyMethod" onchange="togglePregnancyInputs()" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none transition-all">
+                        <option value="lmp" id="method-lmp">Last Menstrual Period</option>
+                        <option value="duedate" id="method-duedate">Due Date</option>
+                    </select>
+                </div>
+
+                <div id="lmpInput">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" id="lmp-date-label">Last Menstrual Period</label>
+                    <input type="date" id="lmpDate" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none transition-all">
+                </div>
+
+                <div id="dueDateInput" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" id="due-date-label">Due Date</label>
+                    <input type="date" id="dueDate" class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-400 focus:outline-none transition-all">
+                </div>
+
+                <button onclick="calculatePregnancy()" class="w-full btn-primary text-white font-semibold py-4 rounded-xl" id="calc-pregnancy-btn">
+                    Calculate
+                </button>
+            </div>
+
+            <!-- Pregnancy Results -->
+            <div id="pregnancyResults" class="mt-6 hidden">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 space-y-4">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent" id="currentWeek"></div>
+                        <div class="text-sm text-gray-600 mt-1" id="weeks-label">Weeks</div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-purple-100">
+                        <span class="text-sm font-medium text-gray-600" id="trimester-label">Trimester</span>
+                        <span class="text-lg font-bold text-purple-600" id="trimester"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600" id="due-date-result-label">Due Date</span>
+                        <span class="text-sm font-semibold text-gray-700" id="dueDateResult"></span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-600" id="days-remaining-label">Days Remaining</span>
+                        <span class="text-2xl font-bold text-pink-600" id="daysRemaining"></span>
+                    </div>
+                </div>
+
+                <!-- Pregnancy Timeline -->
+                <div class="mt-6">
+                    <h3 class="font-semibold text-gray-700 mb-4" id="timeline-title">Pregnancy Milestones</h3>
+                    <div class="relative pl-6 space-y-4" id="pregnancyTimeline">
+                        <!-- Timeline items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            en: {
+                'app-title': 'Women\'s Health Suite',
+                'app-subtitle': 'Your personal health companion',
+                'ovulation-title': 'Ovulation Calculator',
+                'last-period-label': 'Last Period Date',
+                'cycle-length-label': 'Cycle Length (days)',
+                'calc-ovulation-btn': 'Calculate',
+                'ovulation-day-label': 'Ovulation Day',
+                'fertile-window-label': 'Fertile Window',
+                'next-period-label': 'Next Period',
+                'calendar-title': 'Calendar View',
+                'legend-period': 'Period',
+                'legend-fertile': 'Fertile',
+                'legend-ovulation': 'Ovulation',
+                'pregnancy-title': 'Pregnancy Calculator',
+                'calculation-method-label': 'Calculation Method',
+                'method-lmp': 'Last Menstrual Period',
+                'method-duedate': 'Due Date',
+                'lmp-date-label': 'Last Menstrual Period',
+                'due-date-label': 'Due Date',
+                'calc-pregnancy-btn': 'Calculate',
+                'weeks-label': 'Weeks',
+                'trimester-label': 'Trimester',
+                'due-date-result-label': 'Due Date',
+                'days-remaining-label': 'Days Remaining',
+                'timeline-title': 'Pregnancy Milestones',
+                'first-trimester': 'First Trimester',
+                'second-trimester': 'Second Trimester',
+                'third-trimester': 'Third Trimester'
+            },
+            zh: {
+                'app-title': '女性健康助手',
+                'app-subtitle': '您的私人健康伴侣',
+                'ovulation-title': '排卵计算器',
+                'last-period-label': '末次月经日期',
+                'cycle-length-label': '周期长度（天）',
+                'calc-ovulation-btn': '计算',
+                'ovulation-day-label': '排卵日',
+                'fertile-window-label': '易孕期',
+                'next-period-label': '下次月经',
+                'calendar-title': '日历视图',
+                'legend-period': '月经期',
+                'legend-fertile': '易孕期',
+                'legend-ovulation': '排卵日',
+                'pregnancy-title': '怀孕计算器',
+                'calculation-method-label': '计算方式',
+                'method-lmp': '末次月经',
+                'method-duedate': '预产期',
+                'lmp-date-label': '末次月经日期',
+                'due-date-label': '预产期',
+                'calc-pregnancy-btn': '计算',
+                'weeks-label': '周',
+                'trimester-label': '孕期阶段',
+                'due-date-result-label': '预产期',
+                'days-remaining-label': '剩余天数',
+                'timeline-title': '怀孕里程碑',
+                'first-trimester': '早期妊娠',
+                'second-trimester': '中期妊娠',
+                'third-trimester': '晚期妊娠'
+            },
+            ja: {
+                'app-title': '女性の健康スイート',
+                'app-subtitle': 'あなたの健康コンパニオン',
+                'ovulation-title': '排卵計算機',
+                'last-period-label': '最終月経日',
+                'cycle-length-label': '周期の長さ（日）',
+                'calc-ovulation-btn': '計算',
+                'ovulation-day-label': '排卵日',
+                'fertile-window-label': '妊娠可能期間',
+                'next-period-label': '次回の生理',
+                'calendar-title': 'カレンダー表示',
+                'legend-period': '生理',
+                'legend-fertile': '妊娠可能',
+                'legend-ovulation': '排卵',
+                'pregnancy-title': '妊娠計算機',
+                'calculation-method-label': '計算方法',
+                'method-lmp': '最終月経',
+                'method-duedate': '出産予定日',
+                'lmp-date-label': '最終月経日',
+                'due-date-label': '出産予定日',
+                'calc-pregnancy-btn': '計算',
+                'weeks-label': '週',
+                'trimester-label': '妊娠期',
+                'due-date-result-label': '出産予定日',
+                'days-remaining-label': '残り日数',
+                'timeline-title': '妊娠マイルストーン',
+                'first-trimester': '妊娠初期',
+                'second-trimester': '妊娠中期',
+                'third-trimester': '妊娠後期'
+            },
+            ko: {
+                'app-title': '여성 건강 도우미',
+                'app-subtitle': '당신의 개인 건강 동반자',
+                'ovulation-title': '배란 계산기',
+                'last-period-label': '마지막 생리일',
+                'cycle-length-label': '주기 길이 (일)',
+                'calc-ovulation-btn': '계산하기',
+                'ovulation-day-label': '배란일',
+                'fertile-window-label': '가임기',
+                'next-period-label': '다음 생리',
+                'calendar-title': '달력 보기',
+                'legend-period': '생리',
+                'legend-fertile': '가임기',
+                'legend-ovulation': '배란',
+                'pregnancy-title': '임신 계산기',
+                'calculation-method-label': '계산 방법',
+                'method-lmp': '마지막 생리',
+                'method-duedate': '출산 예정일',
+                'lmp-date-label': '마지막 생리일',
+                'due-date-label': '출산 예정일',
+                'calc-pregnancy-btn': '계산하기',
+                'weeks-label': '주',
+                'trimester-label': '임신 단계',
+                'due-date-result-label': '출산 예정일',
+                'days-remaining-label': '남은 일수',
+                'timeline-title': '임신 이정표',
+                'first-trimester': '임신 초기',
+                'second-trimester': '임신 중기',
+                'third-trimester': '임신 후기'
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'en';
+
+        // Change Language
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+
+            // Update all text elements
+            for (const [key, value] of Object.entries(translations[lang])) {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'BUTTON') {
+                        element.value = value;
+                    } else {
+                        element.textContent = value;
+                    }
+                }
+            }
+
+            // Update language buttons
+            document.querySelectorAll('[id^="lang-"]').forEach(btn => {
+                btn.classList.remove('bg-pink-200');
+            });
+            document.getElementById('lang-' + lang).classList.add('bg-pink-200');
+        }
+
+        // Toggle pregnancy inputs
+        function togglePregnancyInputs() {
+            const method = document.getElementById('pregnancyMethod').value;
+            const lmpInput = document.getElementById('lmpInput');
+            const dueDateInput = document.getElementById('dueDateInput');
+
+            if (method === 'lmp') {
+                lmpInput.classList.remove('hidden');
+                dueDateInput.classList.add('hidden');
+            } else {
+                lmpInput.classList.add('hidden');
+                dueDateInput.classList.remove('hidden');
+            }
+        }
+
+        // Calculate Ovulation
+        function calculateOvulation() {
+            const lastPeriod = new Date(document.getElementById('lastPeriodDate').value);
+            const cycleLength = parseInt(document.getElementById('cycleLength').value);
+
+            if (!lastPeriod || isNaN(cycleLength)) {
+                alert(currentLang === 'zh' ? '请填写所有字段' :
+                      currentLang === 'ja' ? 'すべてのフィールドを入力してください' :
+                      currentLang === 'ko' ? '모든 필드를 입력하세요' :
+                      'Please fill all fields');
+                return;
+            }
+
+            // Calculate ovulation day (typically 14 days before next period)
+            const ovulationDay = new Date(lastPeriod);
+            ovulationDay.setDate(ovulationDay.getDate() + (cycleLength - 14));
+
+            // Fertile window: 5 days before ovulation to 1 day after
+            const fertileStart = new Date(ovulationDay);
+            fertileStart.setDate(fertileStart.getDate() - 5);
+            const fertileEnd = new Date(ovulationDay);
+            fertileEnd.setDate(fertileEnd.getDate() + 1);
+
+            // Next period
+            const nextPeriod = new Date(lastPeriod);
+            nextPeriod.setDate(nextPeriod.getDate() + cycleLength);
+
+            // Update results
+            document.getElementById('ovulationDay').textContent = formatDate(ovulationDay);
+            document.getElementById('fertileWindow').textContent =
+                `${formatDate(fertileStart)} - ${formatDate(fertileEnd)}`;
+            document.getElementById('nextPeriod').textContent = formatDate(nextPeriod);
+
+            // Generate calendar
+            generateCalendar(lastPeriod, ovulationDay, fertileStart, fertileEnd, nextPeriod);
+
+            // Save to localStorage
+            localStorage.setItem('ovulationData', JSON.stringify({
+                lastPeriod: lastPeriod.toISOString(),
+                cycleLength,
+                ovulationDay: ovulationDay.toISOString(),
+                fertileStart: fertileStart.toISOString(),
+                fertileEnd: fertileEnd.toISOString(),
+                nextPeriod: nextPeriod.toISOString()
+            }));
+
+            document.getElementById('ovulationResults').classList.remove('hidden');
+        }
+
+        // Generate Calendar
+        function generateCalendar(lastPeriod, ovulationDay, fertileStart, fertileEnd, nextPeriod) {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // Add day headers with month labels
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            days.forEach((day, index) => {
+                const header = document.createElement('div');
+                header.className = 'text-center text-xs font-semibold text-gray-500 p-2';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            // Calculate start date (2 weeks before last period)
+            const startDate = new Date(lastPeriod);
+            startDate.setDate(startDate.getDate() - 14);
+
+            // Track current month for month headers
+            let currentMonth = -1;
+            const monthNames = {
+                en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                zh: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                ja: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                ko: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
+            };
+
+            // Show 42 days (6 weeks) - 6 rows of 7 days
+            for (let week = 0; week < 6; week++) {
+                // Check if we need a month header for this week
+                const weekStartDate = new Date(startDate);
+                weekStartDate.setDate(weekStartDate.getDate() + (week * 7));
+                
+                if (weekStartDate.getMonth() !== currentMonth) {
+                    currentMonth = weekStartDate.getMonth();
+                    const monthHeader = document.createElement('div');
+                    monthHeader.className = 'col-span-7 text-center text-sm font-bold text-pink-600 py-2 mt-2 border-t border-pink-100';
+                    monthHeader.textContent = monthNames[currentLang][currentMonth];
+                    calendarGrid.appendChild(monthHeader);
+                }
+
+                // Generate 7 days for this week
+                for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                    const i = (week * 7) + dayOfWeek;
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(currentDate.getDate() + i);
+
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'calendar-day text-center p-2 rounded-lg text-sm cursor-pointer relative';
+                    dayCell.textContent = currentDate.getDate();
+
+                    // Add month indicator for first day of month
+                    if (currentDate.getDate() === 1) {
+                        dayCell.style.border = '2px solid #ec4899';
+                        dayCell.title = monthNames[currentLang][currentDate.getMonth()];
+                    }
+
+                    // Style based on significance
+                    const currentTime = currentDate.getTime();
+                    const periodStart = lastPeriod.getTime();
+                    const periodEnd = new Date(lastPeriod.getTime() + 5 * 24 * 60 * 60 * 1000).getTime();
+
+                    if (currentTime >= periodStart && currentTime <= periodEnd) {
+                        dayCell.classList.add('period-day');
+                    } else if (currentTime === ovulationDay.getTime()) {
+                        dayCell.classList.add('ovulation-day');
+                    } else if (currentTime >= fertileStart.getTime() && currentTime <= fertileEnd.getTime()) {
+                        dayCell.classList.add('fertile-day');
+                    } else {
+                        dayCell.classList.add('bg-white', 'hover:bg-pink-50');
+                    }
+
+                    calendarGrid.appendChild(dayCell);
+                }
+            }
+        }
+
+        // Calculate Pregnancy
+        function calculatePregnancy() {
+            const method = document.getElementById('pregnancyMethod').value;
+            let lmpDate, dueDate;
+
+            if (method === 'lmp') {
+                lmpDate = new Date(document.getElementById('lmpDate').value);
+                if (!lmpDate || isNaN(lmpDate.getTime())) {
+                    alert(currentLang === 'zh' ? '请输入末次月经日期' :
+                          currentLang === 'ja' ? '最終月経日を入力してください' :
+                          currentLang === 'ko' ? '마지막 생리일을 입력하세요' :
+                          'Please enter last menstrual period');
+                    return;
+                }
+                // Calculate due date (280 days from LMP)
+                dueDate = new Date(lmpDate);
+                dueDate.setDate(dueDate.getDate() + 280);
+            } else {
+                dueDate = new Date(document.getElementById('dueDate').value);
+                if (!dueDate || isNaN(dueDate.getTime())) {
+                    alert(currentLang === 'zh' ? '请输入预产期' :
+                          currentLang === 'ja' ? '出産予定日を入力してください' :
+                          currentLang === 'ko' ? '출산 예정일을 입력하세요' :
+                          'Please enter due date');
+                    return;
+                }
+                // Calculate LMP (280 days before due date)
+                lmpDate = new Date(dueDate);
+                lmpDate.setDate(lmpDate.getDate() - 280);
+            }
+
+            const today = new Date();
+            const daysSinceLMP = Math.floor((today - lmpDate) / (1000 * 60 * 60 * 24));
+            const weeks = Math.floor(daysSinceLMP / 7);
+            const days = daysSinceLMP % 7;
+            const daysRemaining = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+
+            // Determine trimester
+            let trimester;
+            if (weeks < 13) {
+                trimester = translations[currentLang]['first-trimester'];
+            } else if (weeks < 27) {
+                trimester = translations[currentLang]['second-trimester'];
+            } else {
+                trimester = translations[currentLang]['third-trimester'];
+            }
+
+            // Update results
+            document.getElementById('currentWeek').textContent = `${weeks}w ${days}d`;
+            document.getElementById('trimester').textContent = trimester;
+            document.getElementById('dueDateResult').textContent = formatDate(dueDate);
+            document.getElementById('daysRemaining').textContent = daysRemaining > 0 ? daysRemaining : 0;
+
+            // Generate timeline
+            generateTimeline(weeks, lmpDate);
+
+            // Save to localStorage
+            localStorage.setItem('pregnancyData', JSON.stringify({
+                lmpDate: lmpDate.toISOString(),
+                dueDate: dueDate.toISOString(),
+                weeks,
+                trimester
+            }));
+
+            document.getElementById('pregnancyResults').classList.remove('hidden');
+        }
+
+        // Generate Pregnancy Timeline
+        function generateTimeline(currentWeek, lmpDate) {
+            const timeline = document.getElementById('pregnancyTimeline');
+            timeline.innerHTML = '';
+
+            const milestones = [
+                { week: 4, text: { en: 'Positive pregnancy test', zh: '验孕棒显阳性', ja: '妊娠検査陽性', ko: '임신 검사 양성' } },
+                { week: 8, text: { en: 'First heartbeat detected', zh: '首次检测到心跳', ja: '最初の心拍検出', ko: '첫 심박 감지' } },
+                { week: 12, text: { en: 'End of first trimester', zh: '早期妊娠结束', ja: '妊娠初期終了', ko: '임신 초기 종료' } },
+                { week: 20, text: { en: 'Anatomy scan', zh: '解剖扫描', ja: '解剖学的スキャン', ko: '해부학 스캔' } },
+                { week: 27, text: { en: 'Third trimester begins', zh: '晚期妊娠开始', ja: '妊娠後期開始', ko: '임신 후기 시작' } },
+                { week: 36, text: { en: 'Baby drops into pelvis', zh: '胎儿入盆', ja: '赤ちゃんが骨盤に降りる', ko: '아기가 골반으로 내려감' } },
+                { week: 40, text: { en: 'Due date!', zh: '预产期！', ja: '出産予定日！', ko: '출산 예정일!' } }
+            ];
+
+            milestones.forEach(milestone => {
+                const item = document.createElement('div');
+                item.className = `relative pl-6 pb-4 ${currentWeek >= milestone.week ? 'opacity-100' : 'opacity-40'}`;
+
+                const dot = document.createElement('div');
+                dot.className = 'timeline-dot';
+                if (currentWeek >= milestone.week) {
+                    dot.style.background = 'linear-gradient(135deg, #ff6b9d 0%, #c44569 100%)';
+                }
+
+                const content = document.createElement('div');
+                content.className = 'bg-white rounded-xl p-4';
+                content.innerHTML = `
+                    <div class="font-semibold text-purple-600">${translations[currentLang]['weeks-label']} ${milestone.week}</div>
+                    <div class="text-sm text-gray-600 mt-1">${milestone.text[currentLang]}</div>
+                `;
+
+                item.appendChild(dot);
+                item.appendChild(content);
+                timeline.appendChild(item);
+            });
+        }
+
+        // Format Date
+        function formatDate(date) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString(currentLang === 'zh' ? 'zh-CN' :
+                                          currentLang === 'ja' ? 'ja-JP' :
+                                          currentLang === 'ko' ? 'ko-KR' : 'en-US', options);
+        }
+
+        // Load saved data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            changeLanguage(currentLang);
+
+            // Load ovulation data
+            const ovulationData = localStorage.getItem('ovulationData');
+            if (ovulationData) {
+                const data = JSON.parse(ovulationData);
+                document.getElementById('lastPeriodDate').value = data.lastPeriod.split('T')[0];
+                document.getElementById('cycleLength').value = data.cycleLength;
+                calculateOvulation();
+            }
+
+            // Load pregnancy data
+            const pregnancyData = localStorage.getItem('pregnancyData');
+            if (pregnancyData) {
+                const data = JSON.parse(pregnancyData);
+                document.getElementById('lmpDate').value = data.lmpDate.split('T')[0];
+                calculatePregnancy();
+            }
+        });
+    </script>
+</body>
+</html>
